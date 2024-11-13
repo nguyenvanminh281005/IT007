@@ -5,258 +5,175 @@
 #define SORT_BY_BURST 2
 #define SORT_BY_START 3
 
-typedef struct{
-    int iPID;
-    int iArrival, iBurst;
-    int iStart, iFinish, iWaiting, iResponse, iTaT;
+typedef struct {
+    int pid;
+    int arrival, burst;
+    int start, finish, waiting, response, tat;
 } PCB;
 
-int getInformation (PCB Q, int iCriteria) {
-    if (iCriteria == SORT_BY_ARRIVAL) return Q.iArrival;
-    if (iCriteria == SORT_BY_PID) return Q.iPID;
-
-    if (iCriteria == SORT_BY_BURST) return Q.iBurst;
-    if (iCriteria == SORT_BY_START) return Q.iStart;
+int get_information(PCB process, int criteria) {
+    if (criteria == SORT_BY_ARRIVAL) return process.arrival;
+    if (criteria == SORT_BY_PID) return process.pid;
+    if (criteria == SORT_BY_BURST) return process.burst;
+    if (criteria == SORT_BY_START) return process.start;
+    return 0;
 }
-void inputProcess (int n, PCB P[]) {
-    /* Nhap thong tin cua cac tien trinh */
-    for (int i = 0;  i < n; i++) {
+
+void input_process(int n, PCB processes[]) {
+    for (int i = 0; i < n; i++) {
         printf("Input PID of %d-th process: ", i + 1);
-        scanf("%d", &P[i].iPID);
-        printf("Input Arrival time of %d process: ", P[i].iPID);
-        scanf("%d", &P[i].iArrival);
-        printf("Input Burst time %d process: ", P[i].iPID);
-        scanf("%d", &P[i].iBurst);
+        scanf("%d", &processes[i].pid);
+        printf("Input Arrival time of process %d: ", processes[i].pid);
+        scanf("%d", &processes[i].arrival);
+        printf("Input Burst time of process %d: ", processes[i].pid);
+        scanf("%d", &processes[i].burst);
     }
 }
 
-void printProcess (int n, PCB P[]) {
-    /* In ra thong tin cua cac tien trinh */
+void print_process(int n, PCB processes[]) {
     for (int i = 0; i < n; i++) {
-        printf("===== P%d =====\n", P[i].iPID);
-        printf("Start time: %d\n", P[i].iStart);
-        printf("Finish time: %d\n", P[i].iFinish);
-        printf("Waiting time: %d\n", P[i].iWaiting);
-        printf("Response time: %d\n", P[i].iResponse);
-        printf("Turnaround time: %d\n", P[i].iTaT);
-        printf("\n");
-
-        printf("Arrival Time: %d\n", P[i].iArrival);
-        printf("Burst Time: %d\n", P[i].iBurst);
-
+        printf("===== P%d =====\n", processes[i].pid);
+        printf("Arrival Time: %d\n", processes[i].arrival);
+        printf("Burst Time: %d\n", processes[i].burst);
+        printf("Start Time: %d\n", processes[i].start);
+        printf("Finish Time: %d\n", processes[i].finish);
+        printf("Waiting Time: %d\n", processes[i].waiting);
+        printf("Response Time: %d\n", processes[i].response);
+        printf("Turnaround Time: %d\n\n", processes[i].tat);
     }
 }
 
-void exportGanttChart (int n, PCB P[]) {
-    /* Xuat bieu do Gantt */
-    printf("Gantt Chart:\n");
-    // Print top bar
-    printf(" ");
+void export_gantt_chart(int n, PCB processes[]) {
+    printf("Gantt Chart:\n ");
     for (int i = 0; i < n; i++) {
-        for (int j = 0; j < P[i].iBurst; j++) printf("--");
+        for (int j = 0; j < processes[i].burst; j++) printf("--");
         printf(" ");
     }
     printf("\n|");
-
-    // Print process IDs
     for (int i = 0; i < n; i++) {
-        int j;
-        for (j = 0; j < P[i].iBurst - 1; j++) printf(" ");
-        printf("P%d", P[i].iPID);
-        for (j = 0; j < P[i].iBurst - 1; j++) printf(" ");
+        for (int j = 0; j < processes[i].burst - 1; j++) printf(" ");
+        printf("P%d", processes[i].pid);
+        for (int j = 0; j < processes[i].burst - 1; j++) printf(" ");
         printf("|");
     }
     printf("\n ");
-
-    // Print bottom bar
     for (int i = 0; i < n; i++) {
-        int j;
-        for (j = 0; j < P[i].iBurst; j++) printf("--");
+        for (int j = 0; j < processes[i].burst; j++) printf("--");
         printf(" ");
     }
-    printf("\n");
-
-    // Print timeline
-    printf("0");
+    printf("\n0");
     for (int i = 0; i < n; i++) {
-        for (int j = 0; j < P[i].iBurst; j++) printf("  ");
-        if (P[i].iFinish > 9) printf("\b");  // Adjust for double-digit numbers
-        printf("%d", P[i].iFinish);
+        for (int j = 0; j < processes[i].burst; j++) printf("  ");
+        if (processes[i].finish > 9) printf("\b");
+        printf("%d", processes[i].finish);
     }
     printf("\n");
 }
 
-void pushProcess (int *n, PCB P[], PCB Q) {
-    /* them tien trinh Q vao cuoi danh sach tien trinh P*/
-    P[(*n)++] = Q;
+void push_process(int *n, PCB processes[], PCB process) {
+    processes[(*n)++] = process;
 }
 
-void removeProcess (int *n, int index, PCB P[]) {
-    /* Xoa tien trinh index khoi danh sach tien trinh P*/
-    for (int i = index; i + 1 < (*n); i++) P[i] = P[i + 1];
+void remove_process(int *n, int index, PCB processes[]) {
+    for (int i = index; i + 1 < *n; i++) processes[i] = processes[i + 1];
     (*n)--;
 }
 
-void swapProcess (PCB *P, PCB *Q) {
-    PCB tmp;
-    tmp = (*P);
-    (*P) = (*Q);
-    (*Q) =  tmp;
-}
+void quick_sort(PCB processes[], int low, int high, int criteria) {
+    if (low >= high) return;
+    int pivot = get_information(processes[(low + high) / 2], criteria);
+    int left = low, right = high;
 
-void swap (int *P, int *Q) {
-    int tmp;
-    tmp = (*P);
-    (*P) = (*Q);
-    (*Q) =  tmp;
-}
-
-void quickSort (PCB P[], int low, int high, int iCriteria) {
-    if  (low >= high) return ;
-    int tmp = (low + high) >> 1;
-    int L = low, R = high;
-
-    while (R - L + 1 >= 3)  {
-        while (L < tmp && getInformation(P[L], iCriteria) <= getInformation(P[tmp], iCriteria))  L++;
-        while (tmp < R && getInformation(P[tmp], iCriteria) < getInformation(P[R], iCriteria)) R--;
-
-        if (L < tmp && tmp < R) {
-            swapProcess(&P[L], &P[R]);
-            L++;
-            R--;
-        }
-        else {
-            int pos = (R + L) >> 1;
-            swapProcess(&P[pos], &P[tmp]);
-            swap(&pos, &tmp);
+    while (left <= right) {
+        while (get_information(processes[left], criteria) < pivot) left++;
+        while (get_information(processes[right], criteria) > pivot) right--;
+        if (left <= right) {
+            PCB temp = processes[left];
+            processes[left] = processes[right];
+            processes[right] = temp;
+            left++;
+            right--;
         }
     }
 
-    if (getInformation(P[L], iCriteria) > getInformation(P[R], iCriteria)) {
-        if (L == tmp) tmp++;
-        else tmp--;
-        swapProcess(&P[L], &P[R]);
-    }
-    quickSort(P, low, tmp - 1, iCriteria);
-    quickSort(P, tmp + 1, high, iCriteria);
+    quick_sort(processes, low, right, criteria);
+    quick_sort(processes, left, high, criteria);
 }
 
-void calculateAWT (int n, PCB P[]) {
+void calculate_avg_times(int n, PCB processes[]) {
+    int total_waiting = 0, total_tat = 0, total_response = 0;
+
     printf("\nProcess\t\t");
+    for (int i = 0; i < n; i++) printf("\tP%d", processes[i].pid);
+    printf("\nWaiting Time:\t");
     for (int i = 0; i < n; i++) {
-        printf("\tP%d", P[i].iPID);
+        printf("\t%d", processes[i].waiting);
+        total_waiting += processes[i].waiting;
     }
-    printf("\n");
 
-    // Waiting Time Row
-    printf("Waiting time:\t");
+    printf("\nTurnaround Time:");
     for (int i = 0; i < n; i++) {
-        printf("\t%d", P[i].iWaiting);
+        printf("\t%d", processes[i].tat);
+        total_tat += processes[i].tat;
     }
-    printf("\n");
 
-    int t = 0;
-    for (int i = 0; i < n; i++) t = t + P[i].iWaiting;
-
-    printf("\nAWT: %.2f\n", 1.0 * t / n);
-}
-
-void calculateATaT (int n, PCB P[]) {
-    printf("\nProcess\t\t");
+    printf("\nResponse Time:  ");
     for (int i = 0; i < n; i++) {
-        printf("\tP%d", P[i].iPID);
+        printf("\t%d", processes[i].response);
+        total_response += processes[i].response;
     }
-    printf("\n");
 
-//  Turnaround Time Row
-    printf("Turnaround Time:");
-    for (int i = 0; i < n; i++) {
-        printf("\t%d", P[i].iTaT);
-    }
-    printf("\n");
-
-
-    int t = 0;
-    for (int i = 0; i < n; i++) t = t + P[i].iTaT;
-    printf("\nATaT: %.2f\n", 1.0 * t / n);
-}
-
-void calculateART (int n, PCB P[]) {
-    printf("\nProcess\t\t");
-    for (int i = 0; i < n; i++) {
-        printf("\tP%d", P[i].iPID);
-    }
-    printf("\n");
-
-//  Response Time Row
-    printf("Response Time:  ");
-    for (int i = 0; i < n; i++) {
-        printf("\t%d", P[i].iResponse);
-    }
-    printf("\n");
-
-
-    int t = 0;
-    for (int i = 0; i < n; i++) t = t + P[i].iResponse;
-    printf("\nART: %.2f\n", 1.0 * t / n);
+    printf("\n\nAWT: %.2f\nATaT: %.2f\nART: %.2f\n",
+           (float)total_waiting / n,
+           (float)total_tat / n,
+           (float)total_response / n);
 }
 
 int main() {
-    PCB Input[100];
-    PCB ReadyQueue[100];
-    PCB TerminatedArray[100];
-    int iNumberOfProcess;
-    printf("Please input number of Process: ");
-    scanf("%d", &iNumberOfProcess);
+    PCB input[100], ready_queue[100], terminated[100];
+    int num_processes;
 
-    int iRemain = iNumberOfProcess, iReady = 0, iTerminated = 0;
+    printf("Please input the number of processes: ");
+    scanf("%d", &num_processes);
 
-    inputProcess(iNumberOfProcess, Input);
+    int remain = num_processes, ready = 0, terminated_count = 0;
+    input_process(num_processes, input);
+    quick_sort(input, 0, num_processes - 1, SORT_BY_ARRIVAL);
 
-    quickSort(Input, 0, iNumberOfProcess - 1, SORT_BY_ARRIVAL);
+    push_process(&ready, ready_queue, input[0]);
+    remove_process(&remain, 0, input);
 
-    pushProcess(&iReady, ReadyQueue, Input[0]);
-    removeProcess(&iRemain, 0, Input);
+    ready_queue[0].start = ready_queue[0].arrival;
+    ready_queue[0].finish = ready_queue[0].start + ready_queue[0].burst;
+    ready_queue[0].response = ready_queue[0].start - ready_queue[0].arrival;
+    ready_queue[0].waiting = ready_queue[0].response;
+    ready_queue[0].tat = ready_queue[0].finish - ready_queue[0].arrival;
 
-    ReadyQueue[0].iStart = ReadyQueue[0].iArrival;
-    ReadyQueue[0].iFinish = ReadyQueue[0].iStart + ReadyQueue[0].iBurst;
-    ReadyQueue[0].iResponse = ReadyQueue[0].iStart - ReadyQueue[0].iArrival;
-    ReadyQueue[0].iWaiting = ReadyQueue[0].iResponse;
-    ReadyQueue[0].iTaT = ReadyQueue[0].iFinish - ReadyQueue[0].iArrival;
-
-    while (iTerminated < iNumberOfProcess) {
-        while (iRemain > 0) {
-            if (Input[0].iArrival <= ReadyQueue[0].iFinish) {
-                pushProcess(&iReady, ReadyQueue, Input[0]);
-                removeProcess(&iRemain, 0, Input);
-            }
-            else break;
+    while (terminated_count < num_processes) {
+        while (remain > 0 && input[0].arrival <= ready_queue[0].finish) {
+            push_process(&ready, ready_queue, input[0]);
+            remove_process(&remain, 0, input);
         }
 
-        if (iReady > 0) {
-            printProcess(1, ReadyQueue);
-            pushProcess(&iTerminated, TerminatedArray, ReadyQueue[0]);
-            removeProcess(&iReady, 0, ReadyQueue);
+        if (ready > 0) {
+            print_process(1, ready_queue);
+            push_process(&terminated_count, terminated, ready_queue[0]);
+            remove_process(&ready, 0, ready_queue);
 
-            quickSort(ReadyQueue, 0, iReady - 1, SORT_BY_BURST);
+            quick_sort(ready_queue, 0, ready - 1, SORT_BY_BURST);
 
-            ReadyQueue[0].iStart = TerminatedArray[iTerminated - 1].iFinish;
-            ReadyQueue[0].iFinish = ReadyQueue[0].iStart + ReadyQueue[0].iBurst;
-            ReadyQueue[0].iResponse = ReadyQueue[0].iStart - ReadyQueue[0].iArrival;
-            ReadyQueue[0].iWaiting = ReadyQueue[0].iResponse;
-            ReadyQueue[0].iTaT = ReadyQueue[0].iFinish - ReadyQueue[0].iArrival;
+            ready_queue[0].start = terminated[terminated_count - 1].finish;
+            ready_queue[0].finish = ready_queue[0].start + ready_queue[0].burst;
+            ready_queue[0].response = ready_queue[0].start - ready_queue[0].arrival;
+            ready_queue[0].waiting = ready_queue[0].response;
+            ready_queue[0].tat = ready_queue[0].finish - ready_queue[0].arrival;
         }
     }
 
     printf("\n===== SJF Scheduling =====\n");
-    exportGanttChart(iTerminated, TerminatedArray);
-    quickSort(TerminatedArray, 0, iTerminated - 1, SORT_BY_PID);
-
-    printProcess(iTerminated, TerminatedArray);
-
-    calculateART(iTerminated, TerminatedArray);
-    calculateAWT(iTerminated, TerminatedArray);
-    calculateATaT(iTerminated, TerminatedArray);
-    printf("\n");
+    export_gantt_chart(terminated_count, terminated);
+    quick_sort(terminated, 0, terminated_count - 1, SORT_BY_PID);
+    print_process(terminated_count, terminated);
+    calculate_avg_times(terminated_count, terminated);
     return 0;
 }
