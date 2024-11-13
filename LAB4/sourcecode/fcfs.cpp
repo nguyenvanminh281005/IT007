@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define sb_arrival 0
-#define sb_pid 1
-#define sb_burst 2
-#define sb_start 3
+#define SORT_BY_ARRIVAL 0
+#define SORT_BY_PID 1
+#define SORT_BY_BURST 2
+#define SORT_BY_START 3
 
 typedef struct{
     int iPID;
@@ -12,11 +12,11 @@ typedef struct{
 } PCB;
 
 int getInformation (PCB Q, int iCriteria) {
-    if (iCriteria == sb_arrival) return Q.iArrival;
-    if (iCriteria == sb_pid) return Q.iPID;
+    if (iCriteria == SORT_BY_ARRIVAL) return Q.iArrival;
+    if (iCriteria == SORT_BY_PID) return Q.iPID;
 
-    if (iCriteria == sb_burst) return Q.iBurst;
-    if (iCriteria == sb_start) return Q.iStart;
+    if (iCriteria == SORT_BY_BURST) return Q.iBurst;
+    if (iCriteria == SORT_BY_START) return Q.iStart;
 }
 void inputProcess (int n, PCB P[]) {
     /* Nhap thong tin cua cac tien trinh */
@@ -212,7 +212,7 @@ int main() {
     int iRemain = iNumberOfProcess, iReady = 0, iTerminated = 0;
 
     inputProcess(iNumberOfProcess, Input);
-    quickSort(Input, 0, iNumberOfProcess - 1, sb_arrival);
+    quickSort(Input, 0, iNumberOfProcess - 1, SORT_BY_ARRIVAL);
 
     printProcess(iNumberOfProcess, Input);
 
@@ -248,7 +248,7 @@ int main() {
 
     printf("\n===== FCFS Scheduling =====\n");
     exportGanttChart(iTerminated, TerminatedArray);
-    quickSort(TerminatedArray, 0, iTerminated - 1, sb_pid);
+    quickSort(TerminatedArray, 0, iTerminated - 1, SORT_BY_PID);
 
     printProcess(iTerminated, TerminatedArray);
 
