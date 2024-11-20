@@ -1,0 +1,7 @@
+Calulated w = 2 (a)
+Calulated v = 12 (b)
+Calulated y = 60 (c)
+Calulated z = 72 (d)
+Calulated y = 120 (e)
+Calulated z = 144 (f)
+Calulated ans = 264 (g)
