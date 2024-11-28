@@ -13,44 +13,46 @@ pthread_mutex_t mutex;
 
 void* producer(void* arg) {
     while (true) {
-        sem_wait(&sem); // Wait until consumer posts a semaphore
-        pthread_mutex_lock(&mutex); // Ensure mutual exclusion when accessing shared data
+        sem_wait(&sem);
+        pthread_mutex_lock(&mutex);
         if (sells < products) {
             sells++;
+            printf("Producer: %d\n", sells);
         }
-        pthread_mutex_unlock(&mutex); // Unlock mutex after modification
+        pthread_mutex_unlock(&mutex);
     }
+    return NULL;
 }
 
 void* consumer(void* arg) {
     while (true) {
-        pthread_mutex_lock(&mutex); // Lock mutex to modify shared resources
-        if (products < sells + 945) { // Ensure products are updated based on MSSV
+        pthread_mutex_lock(&mutex);
+        if (products < sells + 945) {
             products++;
+            printf("Consumer: %d\n", products);
         }
-        pthread_mutex_unlock(&mutex); // Unlock mutex after modification
-        sem_post(&sem); // Signal the producer that it can consume
+        pthread_mutex_unlock(&mutex);
+        sem_post(&sem);
     }
+    return NULL;
 }
 
 int main() {
     pthread_t producer_thread, consumer_thread;
 
-    // Initialize synchronization primitives
     pthread_mutex_init(&mutex, NULL);
-    sem_init(&sem, 0, 0); // Initialize semaphore with value 0 to synchronize threads
+    sem_init(&sem, 0, 0);
 
-    // Create producer and consumer threads
     pthread_create(&producer_thread, NULL, producer, NULL);
     pthread_create(&consumer_thread, NULL, consumer, NULL);
 
-    // Simulate and print product and sell values
     for (int i = 0; i < 5; i++) {
-        printf("Products: %d, Sells: %d\n", products, sells);
-        usleep(500000); // Sleep for 0.5 seconds (usleep uses microseconds)
+        pthread_mutex_lock(&mutex);
+        printf("Status: Products = %d, Sells = %d\n", products, sells);
+        pthread_mutex_unlock(&mutex);
+        usleep(500000);
     }
 
-    // Clean up
     sem_destroy(&sem);
     pthread_mutex_destroy(&mutex);
 

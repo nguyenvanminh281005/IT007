@@ -21,7 +21,7 @@ void* producer(void* arg) {
         if (count < MAX_ITEMS) {
             arr[count] = rand();
             count++;
-            printf("Producer: Count is %d\n", count);
+            printf("Producer: %d\n", count);
         }
 
         sem_post(&sem);
@@ -36,7 +36,7 @@ void* consumer(void* arg) {
             printf("Consumer: There's nothing to consume\n");
         } else {
             count--;
-            printf("Consumer: Count is %d\n", count);
+            printf("Consumer: %d\n", count);
         }
 
         sem_post(&sem);
