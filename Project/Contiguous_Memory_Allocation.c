@@ -66,14 +66,18 @@ int main (int argc, char* argv[]) {
                     position = i;
                     break;
                 }
-                else if (strcmp(listToken[3], "W") == 0 && ma < sizeBlocks[i]) {
-                    ma = sizeBlocks[i];
-                    position = i;
+                else if (strcmp(listToken[3], "W") == 0) {
+                    if (ma < sizeBlocks[i]) {
+                        ma = sizeBlocks[i];
+                        position = i;
+                    }
                 }
-                else if (strcmp(listToken[3], "B") == 0 && mi > sizeBlocks[i]) {
-                    mi = sizeBlocks[i];
-                    position = i;
-		}
+                else if (strcmp(listToken[3], "B") == 0) {
+                    if (mi > sizeBlocks[i]) {
+                        mi = sizeBlocks[i];
+                        position = i;
+                    }
+                }
                 else {
                     position = -2;
                     break;
@@ -168,15 +172,15 @@ int main (int argc, char* argv[]) {
             }
         }
         else if (strcmp(listToken[0], "STAT") == 0) {  // Status command: STAT
-            lli cur = 0;  
+            lli cur = 0;
             for (int i = 0; i < nBlock; i++) {
                 printf("Addresses [%lld:%lld] ", cur, cur + sizeBlocks[i] - 1);
-                if (strcmp(nameBlocks[i], "Unused") == 0)  
+                if (strcmp(nameBlocks[i], "Unused") == 0)
                     printf("Unused\n");
                 else
-                    printf("Process %s\n", nameBlocks[i]);  
+                    printf("Process %s\n", nameBlocks[i]);
 
-                cur += sizeBlocks[i];  
+                cur += sizeBlocks[i];
             }
         }
 
